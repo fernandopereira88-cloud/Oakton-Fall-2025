@@ -1,0 +1,18 @@
+| Char	| Freq	| Code	| Len	| Total Bits |
+| E		| 1		| 000	| 3		| 3			 |
+| A		| 2		| 111	| 3		| 6			 |
+| C		| 2		| 100	| 3		| 6			 |
+| H		| 2		| 110	| 3		| 6			 |
+| T		| 3		| 01	| 2		| 6			 |
+| O		| 1		| 1011	| 4		| 4			 |
+| B		| 1		| 1010	| 4		| 4			 |
+|  		| 1		| 001	| 3		| 3			 |
+
+Total characters: 13
+Total bits encoded: 38
+Total bits (no encoding, using 3 bits per character): 39
+Average length (L): 2.923077 bit/character
+Entropy (H): 2.873141 bits/character
+Theoretical lower bound T_H: 37.350829
+ceil(T_H): 38
+Redundancy (T - ceil(T_H)): 0
