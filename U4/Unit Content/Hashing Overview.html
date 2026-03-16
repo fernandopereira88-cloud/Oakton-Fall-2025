@@ -1,0 +1,112 @@
+﻿<!DOCTYPE html>
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Hashing</title>
+<link rel="stylesheet" href="https://templates.lcs.brightspace.com/lib/assets/css/styles.min.css"><link rel="stylesheet" href="/d2l/le/contentstyler/6605/files/View" data-override="override"></head><body><h1>Hashing</h1>
+<p>Hashing can be used to build, search, or delete from a table.</p>
+<p>The basic idea behind hashing is to take a field in a record, known as the <b>key</b>, and convert it through some fixed process to a numeric value, known as the <b>hash key</b>, which represents the position to either store or find an item in the table. The numeric value will be in the range of 0 to n-1, where n is the maximum number of slots (or <b>buckets</b>) in the table.</p>
+<p>The fixed process to convert a key to a hash key is known as a <b>hash function</b>. This function will be used whenever access to the table is needed.</p>
+<p>One common method of determining a hash key is the <b>division method</b> of hashing. The formula that will be used is:</p>
+<p>hash key = key % number of slots in the table</p>
+<p><img src="340hash1_20240930153339744.gif" data-d2l-editor-default-img-style="true" style="max-width: 100%;"></p>
+<p>The division method is generally a reasonable strategy, unless the key happens to have some undesirable properties. For example, if the table size is 10 and all of the keys end in zero.</p>
+<p>In this case, the choice of hash function and table size needs to be carefully considered. The best table sizes are prime numbers.</p>
+<p>One problem though is that keys are not always numeric. In fact, it's common for them to be strings.</p>
+<p>One possible solution: add up the ASCII values of the characters in the string to get a numeric value and then perform the division method.</p>
+<pre>int hashValue = 0;
+
+for( int j = 0; j &lt; stringKey.length(); j++ )
+  hashValue += stringKey[j];
+
+int hashKey = hashValue % tableSize;
+</pre>
+<p>The previous method is simple, but it is flawed if the table size is large. For example, assume a table size of 10007 and that all keys are eight or fewer characters long.</p>
+<p>No matter what the hash function, there is the possibility that two keys could resolve to the same hash key. This situation is known as a <b>collision</b>.</p>
+<p>When this occurs, there are two simple solutions:</p>
+<ol>
+<li>chaining</li>
+<li>linear probe (aka linear open addressing)</li>
+</ol>
+<p>And two slightly more difficult solutions</p>
+<ol start="3">
+<li>Quadratic Probe</li>
+<li>Double Hashing</li>
+</ol>
+<h2>Hashing with Chains</h2>
+<p>When a collision occurs, elements with the same hash key will be <b>chained</b> together. A <b>chain</b> is simply a linked list of all the elements with the same hash key.</p>
+<p>The hash table slots will no longer hold a table element. They will now hold the address of a table element.</p>
+<p><img src="340hash2_20240930153339926.gif" data-d2l-editor-default-img-style="true" style="max-width: 100%;"></p>
+<h3>Searching a hash table with chains:</h3>
+<pre>     Compute the hash key
+     If slot at hash key is null
+        Key not found
+     Else
+        Search the chain at hash key for the desired key
+     Endif
+</pre>
+<h3>Inserting into a hash table with chains:</h3>
+<pre>     Compute the hash key
+     If slot at hash key is null
+        Insert as first node of chain
+     Else
+        Search the chain for a duplicate key
+        If duplicate key
+           Don’t insert
+        Else
+           Insert into chain
+        Endif
+     Endif
+</pre>
+<h3>Deleting from a hash table with chains:</h3>
+<pre>     Compute the hash key
+     If slot at hash key is null
+        Nothing to delete
+     Else
+        Search the chain for the desired key
+        If key is not found
+           Nothing to delete
+        Else
+           Remove node from the chain
+        Endif
+     Endif
+</pre>
+<h2>Hashing with Linear Probe</h2>
+<p>When using a linear probe, the item will be stored in the next available slot in the table, assuming that the table is not already full.</p>
+<p>This is implemented via a linear search for an empty slot, from the point of collision. If the physical end of table is reached during the linear search, the search will wrap around to the beginning of the table and continue from there.</p>
+<p>If an empty slot is not found before reaching the point of collision, the table is full.</p>
+<p><img src="340hash3_20240930153340024.gif" data-d2l-editor-default-img-style="true" style="max-width: 100%;"></p>
+<p>A problem with the linear probe method is that it is possible for blocks of data to form when collisions are resolved. This is known as <b>primary clustering</b>.</p>
+<p>This means that any key that hashes into the cluster will require several attempts to resolve the collision.</p>
+<p>For example, insert the nodes 89, 18, 49, 58, and 69 into a hash table that holds 10 items using the division method and linear probing:</p>
+<p><img src="340hash4_20240930153340138.gif" data-d2l-editor-default-img-style="true" style="max-width: 100%;"></p>
+<h2>Hashing with Quadratic Probe</h2>
+<p>To resolve the primary clustering problem, <b>quadratic probing</b> can be used. With quadratic probing, rather than always moving one spot, add i<sup>2</sup> spots from the point of collision, where i is the number of attempts to resolve the collision.</p>
+<p><img src="hashing_quadratic_20240930154315954.PNG" data-d2l-editor-default-img-style="true" style="max-width: 100%;"></p>
+<p>Limitation: at most half of the table can be used as alternative locations to resolve collisions.</p>
+<p>This means that once the table is more than half full, it's difficult to find an empty spot. This new problem is known as <b>secondary clustering</b> because elements that hash to the same hash key will always probe the same alternative cells.</p>
+<h2>Hashing with Double Hashing</h2>
+<p>Double hashing uses the idea of applying a second hash function to the key when a collision occurs. The result of the second hash function will be the number of positions form the point of collision to insert.</p>
+<p>There are a couple of requirements for the second function:</p>
+<ul>
+<li>it must never evaluate to 0</li>
+<li>must make sure that all cells can be probed</li>
+</ul>
+<p>A popular second hash function is: Hash<sub>2</sub>(key) = R - ( key % R ) where R is a prime number that is smaller than the size of the table.</p>
+<p><img src="hashing_double_20240930153340504.PNG" data-d2l-editor-default-img-style="true" style="max-width: 100%;"></p>
+<h2>Hashing with Rehashing</h2>
+<p>Once the hash table gets too full, the running time for operations will start to take too long and may fail. To solve this problem, a table at least twice the size of the original will be built and the elements will be transferred to the new table.</p>
+<p>The new size of the hash table:</p>
+<ul>
+<li>should also be prime</li>
+<li>will be used to calculate the new insertion spot (hence the name <b> rehashing</b>)</li>
+</ul>
+<p>This is a very expensive operation! O(N) since there are N elements to rehash and the table size is roughly 2N. This is ok though since it doesn't happen that often.</p>
+<p>The question becomes when should the rehashing be applied?</p>
+<p>Some possible answers:</p>
+<ul>
+<li>once the table becomes half full</li>
+<li>once an insertion fails</li>
+<li>once a specific load factor has been reached, where load factor is the ratio of the number of elements in the hash table to the table size</li>
+</ul>
+<h2>Deletion from a Hash Table</h2>
+<p>The method of deletion depends on the method of insertion. In any of the cases, the same hash function(s) will be used to find the location of the element in the hash table.</p>
+<p>There is a major problem that can arise if a collision occurred when inserting -- it's possible to "lose" an element.</p></body></html>
